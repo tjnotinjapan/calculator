@@ -20,4 +20,5 @@
 ### 9/11/2026
 - Started project
 - Added simple HTML, CSS, and JS files
-- 
+- Added an operatorLookup which is an object with basic 4 operators (+, -, *, /) and their math funcitions
+- Added compute function to take an inputted string, split into operator and numbers to send to operate function
