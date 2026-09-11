@@ -22,3 +22,6 @@
 - Added simple HTML, CSS, and JS files
 - Added an operatorLookup which is an object with basic 4 operators (+, -, *, /) and their math funcitions
 - Added compute function to take an inputted string, split into operator and numbers to send to operate function
+- Added clearScreen function to clear out calculator 'screen' on page load and for future clear button
+- Added clear button and event listeners for operator and number buttons
+- Added and did basic testing of simple functions (ex. 4 + 5), as well as being able to clear if input new numbers after or continuing with current value if an operator is inputted
