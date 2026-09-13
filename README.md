@@ -25,3 +25,15 @@
 - Added clearScreen function to clear out calculator 'screen' on page load and for future clear button
 - Added clear button and event listeners for operator and number buttons
 - Added and did basic testing of simple functions (ex. 4 + 5), as well as being able to clear if input new numbers after or continuing with current value if an operator is inputted
+### 9/13/2026
+- Added decimal function to calculator, added check to ensure only used once per number
+- Added 0 in front of decimal if inputted without a number
+- Changed button checks to boolean values and moved to top
+- Changed compute function from parseInt to parseFloat to accomodate decimals
+- Redid functions for compute to account for incorrect equations being entered
+- Moved boolens for alreadyEquated and decimalInUse to compute from equals button to ensure only checked if correct equation entered
+### Future to do
+- Handle floats that are irregular (.1 + .2 = 0.300000004 ex.)
+- Handle erasing a decimal and be able to use again
+- Handle starting with decimal after computing, should clear and show '0.' on screen
+- CSS / HTML edits to make calculator look nicer
