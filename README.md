@@ -45,6 +45,8 @@
 - Added OFF button that throws an error to terminate all functions when pressed. Will add on/off indicator to GUI later.
 - Changed decimal from 0. to just . when entered with no leading integer.
 - Changed back to update 'screen' html to '0' when all numbers / inputted elements are erased.
+### 9/15/2026
+- 
 ### Future to do
 - CSS / HTML edits to make calculator look nicer
 - Add keyboard support
