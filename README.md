@@ -40,6 +40,11 @@
 - Modifide `operatorLookup` equations to handle floating point issues (for + and - equations)
 - Changed how the back button is checked to allow decimal to be re-used after deletion
 - Changed how the decimal button is checked to ensure '0.' shows up on screen after an equation has been run (clear screen as new entry like inputting new first number)
+### 9/14/2026 part ii
+- Started CSS / HTML edits for calculator GUI. Added colors, flex box, and reordered buttons
+- Added OFF button that throws an error to terminate all functions when pressed. Will add on/off indicator to GUI later.
+- Changed decimal from 0. to just . when entered with no leading integer.
+- Changed back to update 'screen' html to '0' when all numbers / inputted elements are erased.
 ### Future to do
 - CSS / HTML edits to make calculator look nicer
 - Add keyboard support

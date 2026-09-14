@@ -2,25 +2,44 @@ body {
     border: 8px solid black;
     margin: 0 auto;
     margin-top: 20px;
-    max-width: 500px;
-    padding: 25px;
+    max-width: 700px;
     text-align: center;
 }
 
-div {
-    margin-bottom: 20px;
+
+
+#calculator-container {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(21, 21, 21);
+} 
+
+#calculator-numberpad {
+    display: flex;
 }
 
+
 #calculator-screen {
+    background-color: rgb(158, 152, 141);
     border: 2px solid black;
     height: 40px;
 }
 
-button {
+.input-button {
+    background-color: rgb(21, 21, 21);
     border-radius: 5px;
+    color: white;   
     font-size: 30px;
-    height: 70px;
-    width: 70px;
+    height: 50px;
+    width: 80px;
+}
+
+.input-button.plus {
+    height: 100px;
+}
+
+#clear-button {
+    background-color: rgb(221, 114, 29);
 }
 
 #error-message {

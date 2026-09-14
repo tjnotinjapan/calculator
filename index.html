@@ -7,33 +7,41 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="error-message"></div>
-    <h1>calculator</h1>
     <div id="calculator-container">
+        <div id="error-message"></div>
+        <h1>calculator</h1>
         <div id="calculator-screen"></div>
-        <div id="calculator-functions">
-            <button class="input-button" value=" + ">+</button>
-            <button class="input-button" value=" - ">-</button>
-            <button class="input-button" value=" * ">*</button>
-            <button class="input-button" value=" / ">/</button>
-            <button id="clear-button">CE</button>
-        </div>
-        <div id="calculator-numbers">
-            <button class="input-button" value="1">1</button>
-            <button class="input-button" value="2">2</button>
-            <button class="input-button" value="3">3</button>
-            <button class="input-button" value="4">4</button>
-            <button class="input-button" value="5">5</button>
-            <button class="input-button" value="6">6</button>
-            <button class="input-button" value="7">7</button>
-            <button class="input-button" value="8">8</button>
-            <button class="input-button" value="9">9</button>
-            <button class="input-button" value="0">0</button>
-        </div>
-        <div id="calculator-extra">
-            <button id="decimal-button" class="input-button" value=".">.</button>
-            <button id="back-button" class="input-button" value="←">←</button>
-            <button id="equals-button" class="extra">=</button>
+        <div id="calculator-numberpad">
+            <div id="column-one">
+                <button id="off-button" class="input-button" value="off">OFF</button>
+                <button class="input-button" value="7">7</button>
+                <button class="input-button" value="4">4</button>
+                <button class="input-button" value="1">1</button>
+                <button class="input-button" value="0">0</button>
+            </div>
+
+            <div id="column-two">
+                <button id="clear-button" class="input-button">CE</button>
+                <button class="input-button" value="8">8</button>
+                <button class="input-button" value="5">5</button>
+                <button class="input-button" value="2">2</button>
+                <button id="decimal-button" class="input-button" value=".">.</button>
+            </div>
+
+            <div id="column-three">
+                <button id="back-button" class="input-button" value="←">←</button>
+                <button class="input-button" value="9">9</button>
+                <button class="input-button" value="6">6</button>
+                <button class="input-button" value="3">3</button>
+                <button id="equals-button" class="input-button">=</button>
+            </div>
+
+            <div id="column-four">
+                <button class="input-button" value=" ÷ ">÷</button>
+                <button class="input-button" value=" × ">×</button>
+                <button class="input-button" value=" − ">−</button>
+                <button class="input-button plus" value=" + ">+</button>
+            </div>
         </div>
     </div>
 
