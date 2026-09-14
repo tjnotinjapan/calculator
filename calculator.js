@@ -1,8 +1,8 @@
 // Set 'screen' variable
-const calculatorInputScreen = document.querySelector('#calculator-screen');
+const calculatorScreen = document.querySelector('#calculator-screen');
 
 
-// Add a check to see if the user has computed a problem
+// Add a check to see if the user has checkEquationd a problem
 // Add button check constants
 let alreadyEquated = false;
 let operatorInUse = false;
@@ -15,47 +15,67 @@ const decimalButton = document.querySelector('#decimal-button').value;
 // Object map with operators assigned to their functions
 // Use ex. -> operatorLookup['+'](5, 2) =>>> 5 + 2
 const operatorLookup = {
-        '+': (a, b) => a + b,
-        '-': (a, b) => a - b,
-        '*': (a, b) => a * b,
-        '/': (a, b) => a / b
+        '+': (a, b) => ((a * 100) + (b * 100)) / 100,
+        '-': (a, b) => ((a * 100) - (b * 100)) / 100,
+        '*': (a, b) => (a * b),
+        '/': (a, b) => (a / b)
     }
 
 
 // Check input buttons
 function buttonCheck(buttonValue) {
+    console.log(calculatorScreen.innerHTML)
     // Check if button is an operator button
     if (buttonValue.trim() in operatorLookup) {
         if (!operatorInUse) {
-            operatorInUse = true; // Change boolean of operator 
-            decimalInUse = false; // Allow decimal to be used after operator
+            // Signal that operator has been used, decimal OK for next new number
+            operatorInUse = true;
+            decimalInUse = false;
+        } else if (!alreadyEquated) {
+            // If valid equation present, user can add another operator to previous solution
+            checkEquation(calculatorScreen.innerHTML);
+            alreadyEquated = false;
         } else {
             return false; // Prevent operator if one is already in use (counter at 1)
         }
     }
+
     // Check if decimal button used
     if (buttonValue === decimalButton) {
         if (!decimalInUse) {
             decimalInUse = true; // Decimal can be used, change to true to prevent another decimal
-            if (calculatorInputScreen.innerHTML === '' || calculatorInputScreen.innerHTML.split('').at(-1) === ' ') {
-                calculatorInputScreen.innerHTML += '0'; // Add 0 if decimal inputted with no number
+            if (calculatorScreen.innerHTML === '' || calculatorScreen.innerHTML.split('').at(-1) === ' ') {
+                calculatorScreen.innerHTML += '0'; // Add 0 if decimal inputted with no number
             }
+        } else if (alreadyEquated) {
+            return true;
         } else {
             return false; // Prevent decimal from being inputted again
         }
     }
+
     // Check if back button used
     if (buttonValue === backButton) {
-        if (calculatorInputScreen.innerHTML === '' || alreadyEquated){
+        if (calculatorScreen.innerHTML === '' || alreadyEquated){
             clearScreen();
             return false; // Do nothing, nothing to erase
         }
         // Split string into an array
         // Remove (pop) last item
         // Join back and fill 'screen' with reduced array
-        let removedLastInput = calculatorInputScreen.innerHTML.split('');
-        removedLastInput.pop();
-        calculatorInputScreen.innerHTML = removedLastInput.join('');
+        let removedLastInput = calculatorScreen.innerHTML.split('');
+        let removedLastInputValue = removedLastInput.at(-1);
+
+        if (removedLastInputValue === ' ') {
+            operatorInUse = false; // Operator is deleted, user can use a new operator
+            removedLastInput.length = removedLastInput.length - 3;
+        } else if (removedLastInputValue === '.') {
+            removedLastInput.pop(); // Pop off last element
+            decimalInUse = false; // Allow decimal to be used again
+        } else {
+            removedLastInput.pop(); // Pop off last element
+        }
+        calculatorScreen.innerHTML = removedLastInput.join('');
         return false;
     }
     return true; // For non-restricted buttons
@@ -64,7 +84,7 @@ function buttonCheck(buttonValue) {
 
 // Clear calculator 'screen' and reset booleans
 function clearScreen() {
-    calculatorInputScreen.innerHTML = '';
+    calculatorScreen.innerHTML = '';
     operatorInUse = false;
     decimalInUse = false;
     alreadyEquated = false;
@@ -100,32 +120,40 @@ calculatorButtons.forEach(button => {
         } else if (!buttonCheck(button.value)) {
             return; // Prevent inputted button if fails check
         }
-        calculatorInputScreen.innerHTML = calculatorInputScreen.innerHTML + button.value;
+        calculatorScreen.innerHTML = calculatorScreen.innerHTML + button.value;
     })
 });
 
 
 
-// Return result of math based on operators and inputs to calculator screen
-function operate(operator = '+', firstNumber = 0, secondNumber = 0) {
-    if (!operatorLookup[operator](firstNumber, secondNumber)) {
-        return false;
+// Runs equation based on matching operators
+// Updates 'screen' with solution
+function operate(operator, firstNumber, secondNumber) {
+    const solution = operatorLookup[operator](firstNumber, secondNumber);
+    // Handle different type of 'errors' that may occur
+    if (solution === Infinity) {
+        errorMessage('Cannot divide by 0!'); // User attempts to divide by 0
+        alreadyEquated = false; // Allows user to edit equation
+        return;
+    } else if (solution === NaN) {
+        return;
     }
-    calculatorInputScreen.innerHTML = operatorLookup[operator](firstNumber, secondNumber);
+    calculatorScreen.innerHTML = operatorLookup[operator](firstNumber, secondNumber);
     
 }
 
 
-// Compute inputted string from calculator (ex '25 + 25')
-function compute(input) {
+// Check inputted string from calculator (ex '25 + 25')
+function checkEquation(input) {
     const mathVariables = input.split(" ");
     const operator = mathVariables[1];
     const firstNumber = parseFloat(mathVariables[0]);
     const secondNumber = parseFloat(mathVariables[2]);
     
-    if (!operator || !firstNumber || !secondNumber) {
-        // Do Nothing!! Not a proper equation
+    if (!operator in operatorLookup || isNaN(firstNumber) || isNaN(secondNumber)) {
+        errorMessage('This is not a correct equation!') // Error message for failed equation
     } else {
+        // Equation is correct, reset boolean and run through operate
         alreadyEquated = true;
         decimalInUse = false;
         operate(operator, firstNumber, secondNumber);
@@ -137,5 +165,17 @@ function compute(input) {
 const equalsButton = document.querySelector('#equals-button');
 equalsButton.addEventListener('click', (event) => {
     event.preventDefault();
-    compute(calculatorInputScreen.innerHTML);
+    checkEquation(calculatorScreen.innerHTML);
 })
+
+
+// Error message element and function
+const errorMessageEl = document.querySelector('#error-message');
+function errorMessage(message) {
+    // Show error message for specified time, then clear element
+    errorMessageEl.innerHTML = message;
+    setTimeout(() => {
+        errorMessageEl.innerHTML = '';
+    }, 1000);
+    
+}

@@ -22,3 +22,10 @@ button {
     height: 70px;
     width: 70px;
 }
+
+#error-message {
+    color: red;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
