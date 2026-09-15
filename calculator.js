@@ -2,39 +2,31 @@
 const calculatorScreen = document.querySelector('#calculator-screen');
 
 // Adds inputs to screen to display on calculator
-function screenDisplay(str) {
+function screenDisplay(input, type='add') {
     const currentDisplay = calculatorScreen.innerHTML;
 
-    // If screen is at default '0' value
-    if (currentDisplay === '0') {
-        if (str in operatorLookup) {
-            screenDisplay('0' + str); // '0' or '0 + operator' is inputted
-            return;
-        } else if (str in validNumbers) {
-            calculatorScreen.innerHTML = str; // Number inputted replaces '0'
-            return;
-        }
-    }
+    // Limit of 10 chars for screen
+    if (currentDisplay.length < 11) {
+        // Screen types
+        // add -> just add input to screen
+        // new -> override screen with new input
+        if (type === 'new') { calculatorScreen.innerHTML = input;}
 
-    if (currentDisplay.length < 10) { // Limit of 10 chars for screen
-        calculatorScreen.innerHTML = currentDisplay + str;
-    } else {
-        errorMessage('XXX'); // Change to error light
-    }
+        if (type === 'add') { calculatorScreen.innerHTML = currentDisplay + input;}
+    
+    } else { errorLight(); }
+    
+
 }
 
-
-// Toggles calculator off or on visually for user
-let calculateIsOn = false;
-
+// Turn calculator 'on' or 'off'
+const powerLight = document.querySelector('#power-light');
 function powerSwitch(status) {
     if (status === 'off') {
-        calculateIsOn = false;
         calculatorScreen.innerHTML = '';
+        powerLight.style.display = 'none';
         throw Error("CALCULATOR_OFF"); // Force ends all functions
-    } else {
-        calculateIsOn = true;
-    }
+    } else { powerLight.style.display = 'block';}
 }
 
 
@@ -96,20 +88,6 @@ function useOperator(buttonValue, screenInput) {
     throw Error('buttonValue must be that of an operator to use this function'); // Wrong button value inputted into function
 }
 
-// Use decimal in equation if valid
-function useDecimal(buttonValue, screenInput) {
-    // Check if decimal button used
-    if (buttonValue == decimalButtonValue) {
-        if (!decimalInUse) {
-            decimalInUse = true; // Decimal can be used, change to true to prevent another decimal
-            calculatorScreen.innerHTML = screenInput + buttonValue;
-            return;
-        } else {
-            return false; // Prevent decimal from being inputted again
-        }
-    }
-    throw Error('buttonValue does not match decimal variable value'); // Button inputted is not a decimal
-}
 
 function useBackButton(buttonValue, screenInput) {
     console.log(buttonValue, backButtonValue);
@@ -176,33 +154,31 @@ const masterButtonList =  [];
 // Value of buttons evaluated for type / function (should be inputted as string value)
 function buttonEvaluator(buttonValue=String) {
 
+    // Turns calculator on or off (off if value is 'off')
+    powerSwitch(buttonValue);
+
     // Trim button value string to remove spaces (use for checking validity)
     const trimmedButton = buttonValue.trim();
 
-    // Turns calculator on or off (off if value is 'off')
-    powerSwitch(trimmedButton);
-
-    // Get current screen input
+    // Current screen html value
     const screenInput = calculatorScreen.innerHTML;
-    const screenInputArray = screenInput.split('');
 
-    // Number inputted
+    // For valid number inputs
     if (trimmedButton in validNumbers) {
-        screenDisplay(buttonValue);
-        return;
+        if (screenInput === '0') { screenDisplay(buttonValue, 'new')} else { screenDisplay(buttonValue, 'add')}
     }
 
-    // Equal sign used, send inputted equation to be checked (and run if passed)
-    if (trimmedButton === equalsButton) {
-        checkEquation(screenInput);
-        return;
-    }
+    // Equal sign used, send inputted equation to be checked
+    if (trimmedButton === equalsButton) { checkEquation(screenInput);}
 
-    //
+    // Decimal button is used
     if (trimmedButton === decimalButtonValue) {
-        useDecimal(buttonValue, screenInput);
-        return;
+        if (!decimalInUse) { decimalInUse = true; 
+            if (screenInput === '0' || alreadyEquated) { screenDisplay(buttonValue, 'new')
+        
+            } else { screenDisplay(buttonValue, 'add')}}
     }
+
 
     // Backspaced used
     if (trimmedButton === backButtonValue) {
@@ -232,7 +208,7 @@ function operate(operator, firstNumber, secondNumber) {
     const solution = operatorLookup[operator](firstNumber, secondNumber);
     // Handle different type of 'errors' that may occur
     if (solution === Infinity) {
-        errorMessage('Hey! You cannot divide by 0!'); // User attempts to divide by 0
+        errorLight(`Uh oh! Can't do that!`, 2200); // User attempts to divide by 0
         alreadyEquated = false; // Allows user to edit equation
         return;
     } else if (solution === NaN) {
@@ -254,7 +230,7 @@ function checkEquation(input=String) {
     const secondNumber = parseFloat(mathVariables[2]);
     
     if (!operator in operatorLookup || isNaN(firstNumber) || isNaN(secondNumber)) {
-        errorMessage('This is not a correct equation!') // Error message for failed equation
+        errorLight() // Error message for failed equation
     } else {
         operate(operator, firstNumber, secondNumber); // Send equation through to operate if valid
     }
@@ -291,12 +267,19 @@ const keyboardButton = document.addEventListener('keydown', (event) => {
 
 
 // Error message element and function
-const errorMessageEl = document.querySelector('#error-message');
-function errorMessage(message) {
-    // Show error message for specified time, then clear element
-    errorMessageEl.innerHTML = message;
+const errorLightEl = document.querySelector('#error-light');
+function errorLight(message, duration=100) {
+    // Show optional error message for specified time, then clear element
+    errorLightEl.style.display = 'block';
+
+    if (message) { // Show error message on screen
+        calculatorScreen.innerHTML = message;
+    }
+    
     setTimeout(() => {
-        errorMessageEl.innerHTML = '';
-    }, 1000);
+        errorLightEl.style.display = 'none';
+        if (message) { clearScreen(); }
+    }, duration);
+
     
 }
