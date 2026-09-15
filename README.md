@@ -48,6 +48,13 @@
 ### 9/15/2026
 - Redid javascript to cleanup (see commit notes): revamped button check function to `buttonEvaluator` that will checks all conditions to see if button is valid and what to do (use an operator, run equation, and more).
 - Added keyboard support, using a lookup object to ensure keyboard key values match calculator values used on HTML buttons
+### 9/15 (ii) - 9/16/2026
+- Added custom divide by 0 error effect
+- Added power light with visuable function
+- Removed `useOperator`, `useDecimal`, and `useBackspace` functions, moved basic functions to `buttonEvaluator`.
+- `screenDisplay` function handles new or added inputs. 
+- Added booleans and variables to keep track of operators and first/second number inputs. 
+- Removed operators showing on screen. 
 ### Future to do
 - CSS / HTML edits to make calculator look nicer
-- Adjust screen to only show numbers max 10 digits, and don't show operators
+- Adjust screen to only show numbers max 10 digits
