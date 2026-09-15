@@ -1,12 +1,3 @@
-// Object map with operators assigned to their functions
-// Use ex. -> operatorLookup['+'](5, 2) =>>> 5 + 2
-const operatorLookup = {
-    '+': (a, b) => ((a * 100) + (b * 100)) / 100,
-    '−': (a, b) => ((a * 100) - (b * 100)) / 100,
-    '×': (a, b) => (a * b),
-    '÷': (a, b) => (a / b)
-}
-
 // Set 'screen' variable
 const calculatorScreen = document.querySelector('#calculator-screen');
 
@@ -33,8 +24,7 @@ let alreadyEquated = false;
 let operatorInUse = false;
 let decimalInUse = false;
 
-const backButtonValue = document.querySelector('#back-button').value;
-const decimalButtonValue = document.querySelector('#decimal-button').value;
+
 
 // Clear calculator 'screen' and reset booleans
 function clearScreen() {
@@ -46,60 +36,72 @@ function clearScreen() {
 }
 
 
-function checkIfOperator(button) {
-    console.log(button)
-    console.log(operatorInUse)
-    if (button.trim() in operatorLookup) {
-        console.log('operator detected')
+// Use operator if valid for calculator
+function useOperator(buttonValue, screenInput) {
+
+    if (buttonValue.trim() in operatorLookup) {
+        // If no operator used yet, add to screen input and reset decimal boolean
         if (!operatorInUse) {
-            // Signal that operator has been used, decimal OK for next new number
+            calculatorScreen.innerHTML = screenInput + buttonValue;
             operatorInUse = true;
             decimalInUse = false;
-            console.log('flipping')
-        } else if (!alreadyEquated) {
-            // If valid equation present, user can add another operator to previous solution
-            if (checkEquation(calculatorScreen.innerHTML)) {
-                alreadyEquated = false;
-
-            }
-            
+            return;
+        
         } else {
-            console.log('should be stopped')
-            return false; // Prevent operator if one is already in use (counter at 1)
+            // Prevent multiple operators inputted together
+            if (screenInput.split('').at(-1) == ' ') {
+                return false;
+            }
+            // If already equated, using sum as first number in new equation
+            if (alreadyEquated) {
+                alreadyEquated = false;
+                calculatorScreen.innerHTML = screenInput + buttonValue;
+                return;
+            // Run the equation first before adding operator to outputted sum
+            } else if (!alreadyEquated) {
+                checkEquation(screenInput); // Changes innerHTML of screen to sum (or exits out if equation not valid)
+                calculatorScreen.innerHTML = calculatorScreen.innerHTML + buttonValue;
+                operatorInUse = true;
+                alreadyEquated = false;
+                decimalInUse = false;
+                return;
+            }
         }
     }
-    return true; // Button is not an operator
+    throw Error('buttonValue must be that of an operator to use this function'); // Wrong button value inputted into function
 }
 
-function checkIfDecimal(button) {
+// Use decimal in equation if valid
+function useDecimal(buttonValue, screenInput) {
     // Check if decimal button used
-    if (button === decimalButtonValue) {
+    if (buttonValue == decimalButtonValue) {
         if (!decimalInUse) {
             decimalInUse = true; // Decimal can be used, change to true to prevent another decimal
-        } else if (alreadyEquated) {
-            return true;
+            calculatorScreen.innerHTML = screenInput + buttonValue;
+            return;
         } else {
             return false; // Prevent decimal from being inputted again
         }
     }
-    return true; // Button is not a decimal
+    throw Error('buttonValue does not match decimal variable value'); // Button inputted is not a decimal
 }
 
-function checkIfBackButton(button) {
+function useBackButton(buttonValue, screenInput) {
+    console.log(buttonValue, backButtonValue);
     // Check if back button used
-    if (button === backButtonValue) {
-        if (calculatorScreen.innerHTML === '' || alreadyEquated){
+    if (buttonValue === backButtonValue) {
+        if (screenInput === '' || alreadyEquated){
             clearScreen();
-            return false; // Do nothing, nothing to erase
+            return; // Do nothing, nothing to erase
         }
         // Split string into an array
         // Remove (pop) last item
         // Join back and fill 'screen' with reduced array
-        let removedLastInput = calculatorScreen.innerHTML.split('');
+        let removedLastInput = screenInput.split('');
         let removedLastInputValue = removedLastInput.at(-1);
 
         if (removedLastInput.length == '1' && removedLastInput[0] == 0){
-            return false;
+            return; // Don't erase '0' if it is only element in string
         }
 
         if (removedLastInputValue === ' ') { // Check for operator (ex. ' + ')
@@ -119,61 +121,97 @@ function checkIfBackButton(button) {
         } else {
             calculatorScreen.innerHTML = newInputString;
         }
-        return false;
+
+        return; // Back button used
     }
-    return true; // Button is not a back button
+    throw Error('buttonValue inputted does not match back button value'); // Button is not a back button
 }
 
+// Object map with operators assigned to their functions
+// Use ex. -> operatorLookup['+'](5, 2) =>>> 5 + 2
+const operatorLookup = {
+    '+': (a, b) => ((a * 100) + (b * 100)) / 100,
+    '−': (a, b) => ((a * 100) - (b * 100)) / 100,
+    '×': (a, b) => (a * b),
+    '÷': (a, b) => (a / b)
+}
 
-// Check input buttons
-function buttonCheck(button) {
+// List of valid input numbers to be used
+const validNumbers = ['0','1','2','3','4','5','6','7','8','9'];
 
-    // Button input toggles on calculator (unless OFF button pressed)
-    powerSwitch(button); // Nothing happens if OFF pressed
+// Unique buttons
+const backButtonValue = document.querySelector('#back-button').value;
+const decimalButtonValue = document.querySelector('#decimal-button').value;
+const equalsButton = document.querySelector('#equals-button').value;
+const clearButton = document.querySelector('#clear-button').value;
 
-    console.log(calculatorScreen.innerHTML)
-    
-    // Check for special button inputs
-    if (!checkIfOperator(button)) {
-        return false;
-    } else if (!checkIfDecimal(button)) {
-        return false;
-    } else if (!checkIfBackButton(button)) {
-        return false;
-    }
+// Master list of all accepted buttons
+const masterButtonList =  [];
 
-    if (calculatorScreen.innerHTML === '') {
-        calculatorScreen.innerHTML = '0';
-    }
+// Value of buttons evaluated for type / function (should be inputted as string value)
+function buttonEvaluator(buttonValue=String) {
 
-    // Verify button being pressed
-    // If button is an operator and has already done previous calculation
-    if (alreadyEquated && button.trim() in operatorLookup) {
-        alreadyEquated = false; // User can use current value with operator 
+    // Trim button value string to remove spaces (use for checking validity)
+    const trimmedButton = buttonValue.trim();
 
-    // If inputs a new number after doing a calculation
-    } else if (alreadyEquated) {
-        clearScreen(); // Clear screen for new first number input
-        alreadyEquated = false;
-    }
+    // Turns calculator on or off (off if value is 'off')
+    powerSwitch(trimmedButton);
 
-    // Replace 0 if it is the only number inputted (for non-decimal integers)
-    const screenValue = calculatorScreen.innerHTML.split('');
-    if (screenValue.length == 1 && screenValue[0] == 0) {
-        console.log('A')
-        console.log(button)
-        if (button == '' || button.trim() in operatorLookup) { // No clear ('') or decimal inputs
-            calculatorScreen.innerHTML = '0' + button;
-            console.log('B')
-        } else {
-            calculatorScreen.innerHTML = button;
-            console.log('C')
+    // Get current screen input
+    const screenInput = calculatorScreen.innerHTML;
+    const screenInputArray = screenInput.split('');
+
+    // If screen is at default '0' value
+    if (screenInputArray.length == 1 && screenInputArray[0] == 0) {
+        if (trimmedButton == '' || trimmedButton in operatorLookup) {
+            calculatorScreen.innerHTML = '0' + buttonValue; // '0' or '0 + operator' is inputted
+            return;
+        } else if (trimmedButton in validNumbers) {
+            calculatorScreen.innerHTML = buttonValue; // Number inputted replaces '0'
+            return;
+        } else if (trimmedButton === decimalButtonValue) {
+            calculatorScreen.innerHTML = buttonValue; // '.' replaces '0'
+            decimalInUse = true;
+            return;
         }
-    } else {
-        calculatorScreen.innerHTML = calculatorScreen.innerHTML + button;
-        console.log('D')
-        
     }
+
+    // Number inputted
+    if (trimmedButton in validNumbers) {
+        calculatorScreen.innerHTML = screenInput + buttonValue;
+        return;
+    }
+
+    // Equal sign used, send inputted equation to be checked (and run if passed)
+    if (trimmedButton === equalsButton) {
+        checkEquation(screenInput);
+        return;
+    }
+
+    //
+    if (trimmedButton === decimalButtonValue) {
+        useDecimal(buttonValue, screenInput);
+        return;
+    }
+
+    // Backspaced used
+    if (trimmedButton === backButtonValue) {
+        useBackButton(buttonValue, screenInput);
+        return;
+    }
+
+    // An operator is used, send raw button value and screen input to useOperator
+    if (trimmedButton in operatorLookup) {
+        useOperator(buttonValue, screenInput);
+        return;
+    }
+
+    // Clear button is used
+    if (trimmedButton === clearButton) {
+        clearScreen();
+        return;
+    }
+    
 }
 
 
@@ -199,7 +237,7 @@ function operate(operator, firstNumber, secondNumber) {
 
 
 // Check if inputted string from calculator is a valid equation
-function checkEquation(input) {
+function checkEquation(input=String) {
     const mathVariables = input.split(" ");
     const operator = mathVariables[1];
     const firstNumber = parseFloat(mathVariables[0]);
@@ -212,30 +250,34 @@ function checkEquation(input) {
     }
 }
 
-// Allow users to clear out input 'screen'
-const clearInputButton = document.querySelector('#clear-button');
-clearInputButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    clearScreen();
-})
-
 
 // Send values of inputted buttons (clicked on screen) to button check
 const calculatorButtons = document.querySelectorAll('.input-button');
 calculatorButtons.forEach(button => {
     button.addEventListener('click', (event) => {
         event.preventDefault();
-        buttonCheck(button.value);
+        buttonEvaluator(button.value);
     })
 });
 
-
-// Attempt to calculate input when '=' clicked
-const equalsButton = document.querySelector('#equals-button');
-equalsButton.addEventListener('click', (event) => {
+// Supported non-number (unique) keyboard inputs to match calculator buttons
+const keyboardOperatorLookup = {
+    '+': ' + ',
+    '-': ' − ',
+    '*': ' × ',
+    '/': ' ÷ ',
+    'Enter': '=',
+    '.': '.'
+}
+const keyboardButton = document.addEventListener('keydown', (event) => {
     event.preventDefault();
-    checkEquation(calculatorScreen.innerHTML);
-})
+    console.log(event.key)
+    if (event.key in keyboardOperatorLookup) {
+        buttonEvaluator(keyboardOperatorLookup[event.key])
+    } else {
+        buttonEvaluator(event.key);
+    }
+});
 
 
 // Error message element and function
