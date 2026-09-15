@@ -46,7 +46,7 @@
 - Changed decimal from 0. to just . when entered with no leading integer.
 - Changed back to update 'screen' html to '0' when all numbers / inputted elements are erased.
 ### 9/15/2026
-- 
+- Redid javascript to cleanup (see commit notes): revamped button check function to `buttonEvaluator` that will checks all conditions to see if button is valid and what to do (use an operator, run equation, and more).
+- Added keyboard support, using a lookup object to ensure keyboard key values match calculator values used on HTML buttons
 ### Future to do
 - CSS / HTML edits to make calculator look nicer
-- Add keyboard support
