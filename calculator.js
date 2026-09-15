@@ -1,6 +1,28 @@
 // Set 'screen' variable
 const calculatorScreen = document.querySelector('#calculator-screen');
 
+// Adds inputs to screen to display on calculator
+function screenDisplay(str) {
+    const currentDisplay = calculatorScreen.innerHTML;
+
+    // If screen is at default '0' value
+    if (currentDisplay === '0') {
+        if (str in operatorLookup) {
+            screenDisplay('0' + str); // '0' or '0 + operator' is inputted
+            return;
+        } else if (str in validNumbers) {
+            calculatorScreen.innerHTML = str; // Number inputted replaces '0'
+            return;
+        }
+    }
+
+    if (currentDisplay.length < 10) { // Limit of 10 chars for screen
+        calculatorScreen.innerHTML = currentDisplay + str;
+    } else {
+        errorMessage('XXX'); // Change to error light
+    }
+}
+
 
 // Toggles calculator off or on visually for user
 let calculateIsOn = false;
@@ -9,11 +31,9 @@ function powerSwitch(status) {
     if (status === 'off') {
         calculateIsOn = false;
         calculatorScreen.innerHTML = '';
-        throw Error("CALCULATOR_OFF");
-        console.log('The calculator is OFF')
+        throw Error("CALCULATOR_OFF"); // Force ends all functions
     } else {
         calculateIsOn = true;
-        console.log('The calculator is ON')
     }
 }
 
@@ -40,6 +60,11 @@ function clearScreen() {
 function useOperator(buttonValue, screenInput) {
 
     if (buttonValue.trim() in operatorLookup) {
+
+        // Highlight operator button 'pressed'
+
+
+
         // If no operator used yet, add to screen input and reset decimal boolean
         if (!operatorInUse) {
             calculatorScreen.innerHTML = screenInput + buttonValue;
@@ -161,24 +186,9 @@ function buttonEvaluator(buttonValue=String) {
     const screenInput = calculatorScreen.innerHTML;
     const screenInputArray = screenInput.split('');
 
-    // If screen is at default '0' value
-    if (screenInputArray.length == 1 && screenInputArray[0] == 0) {
-        if (trimmedButton == '' || trimmedButton in operatorLookup) {
-            calculatorScreen.innerHTML = '0' + buttonValue; // '0' or '0 + operator' is inputted
-            return;
-        } else if (trimmedButton in validNumbers) {
-            calculatorScreen.innerHTML = buttonValue; // Number inputted replaces '0'
-            return;
-        } else if (trimmedButton === decimalButtonValue) {
-            calculatorScreen.innerHTML = buttonValue; // '.' replaces '0'
-            decimalInUse = true;
-            return;
-        }
-    }
-
     // Number inputted
     if (trimmedButton in validNumbers) {
-        calculatorScreen.innerHTML = screenInput + buttonValue;
+        screenDisplay(buttonValue);
         return;
     }
 
