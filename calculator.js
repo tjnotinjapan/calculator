@@ -230,7 +230,7 @@ function operate(operator, firstNumber, secondNumber) {
     }
 
     // Update 'screen' and boolean values
-    calculatorScreen.innerHTML = operatorLookup[operator](firstNumber, secondNumber);
+    calculatorScreen.innerHTML = (operatorLookup[operator](firstNumber, secondNumber));
     alreadyEquated = true; // Equation is success
     decimalInUse = false; // Free to use decimal again
 }

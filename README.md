@@ -50,3 +50,4 @@
 - Added keyboard support, using a lookup object to ensure keyboard key values match calculator values used on HTML buttons
 ### Future to do
 - CSS / HTML edits to make calculator look nicer
+- Adjust screen to only show numbers max 10 digits, and don't show operators

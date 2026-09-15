@@ -2,7 +2,7 @@ body {
     border: 8px solid black;
     margin: 0 auto;
     margin-top: 20px;
-    max-width: 700px;
+    max-width: 400px;
     text-align: center;
 }
 
@@ -12,17 +12,23 @@ body {
     display: flex;
     flex-direction: column;
     background-color: rgb(21, 21, 21);
+    height: 570px;
+    width: 400px;
 } 
 
 #calculator-numberpad {
     display: flex;
+    margin-top: auto;
 }
 
 
 #calculator-screen {
     background-color: rgb(158, 152, 141);
     border: 2px solid black;
-    height: 40px;
+    height: 80px;
+    font-size: 70px;
+    text-align: right;
+    margin-top: auto;
 }
 
 .input-button {
@@ -30,12 +36,12 @@ body {
     border-radius: 5px;
     color: white;   
     font-size: 30px;
-    height: 50px;
-    width: 80px;
+    height: 60px;
+    width: 95px;
 }
 
 .input-button.plus {
-    height: 100px;
+    height: 120px;
 }
 
 #clear-button {
