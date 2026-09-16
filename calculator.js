@@ -25,18 +25,18 @@ function screenDisplay(input, type='add') {
     // Limit number digits to set limit
     if (type === 'solution') {
 
-        let condensedInput = input;
+        let overflowInput = input;
 
         // Show any numbers too large for screen as exponents
-        if (condensedInput.toString().length > charLimit) { 
-            if (condensedInput > 10000000000000 || condensedInput < -10000000000000) {
-                condensedInput = Math.round(Number(((condensedInput / (10 ** (condensedInput.toString().length - 1))).toString().slice(0,10) * (1000000000000)) / (1000000000000))) + 'ᴇ' + condensedInput.toString().length;
+        if (overflowInput.toString().length > charLimit) { 
+            if (overflowInput > 10000000000000 || overflowInput < -10000000000000) {
+                overflowInput = Math.round(Number(((overflowInput / (10 ** (overflowInput.toString().length - 1))).toString().slice(0,10) * (1000000000000)) / (1000000000000))) + 'ᴇ' + overflowInput.toString().length;
             } else {
             // Otherwise, round large numbers (full or decimal) to global limit 
-            condensedInput = Math.round(Number(condensedInput.toString().slice(0, charLimit)) * (10 ** charLimit)) / 10 ** charLimit; }
+            overflowInput = Math.round(Number(overflowInput.toString().slice(0, charLimit)) * (10 ** charLimit)) / 10 ** charLimit; }
         }
 
-        calculatorScreen.innerHTML = condensedInput; // Display outputted number on screen
+        calculatorScreen.innerHTML = overflowInput; // Display outputted number on screen
         firstNumberInput = input; // Keep full, uncondensed number for future calculations
     }
 }
