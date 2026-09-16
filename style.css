@@ -73,10 +73,10 @@ body {
 #calculator-screen {
     background-color: rgb(158, 152, 141);
     border: 2px solid black;
-    height: 80px;
-    font-size: 70px;
+    height: 60px;
+    font-size: 50px;
     text-align: right;
-    margin-top: 55px;
+    margin-top: 75px;
 }
 
 #calculator-numberpad {

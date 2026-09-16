@@ -55,6 +55,11 @@
 - `screenDisplay` function handles new or added inputs. 
 - Added booleans and variables to keep track of operators and first/second number inputs. 
 - Removed operators showing on screen. 
+### 9/16/2026 part ii
+- Finished combining all button actions into `buttonEvaluator`
+- Added rounding support and global limit of 14 digits
+- CSS and HTML adjusted for calculator appearance
+- Added some support for whole numbers too big for screen. Need to increase accuracy.
 ### Future to do
-- CSS / HTML edits to make calculator look nicer
-- Adjust screen to only show numbers max 10 digits
+- Adjust screen to support numbers over 14 digits (expressed in exponent)
+- Let second operator calculate an expression
