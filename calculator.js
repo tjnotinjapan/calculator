@@ -3,6 +3,34 @@ const calculatorScreen = document.querySelector('#calculator-screen');
 // Limit input to 14 chars for screen
 const charLimit = 14;
 
+// Should be assigned: operator, first number, second number to run an equation
+const calculatorEquation = {
+    operator: '',
+    firstNumber: '',
+    secondNumber: ''
+}
+
+function resetCalculatorEquation() {
+    calculatorEquation.operator = '';
+    calculatorEquation.firstNumber = '';
+    calculatorEquation.secondNumber = '';
+}
+
+// Resets after first number inputted to prevent duplicates / auto calculating
+let currentInputValue = '';
+function clearCurrentInputValue() {
+    currentInputValue = '';
+}
+
+// Clear calculator 'screen' and reset booleans
+function clearScreen() {
+    calculatorScreen.innerHTML = '';
+    clearCurrentInputValue();
+}
+
+// Informs display if next inputs should replace current displayed input
+let clearScreenOnNextInput = false;
+
 // Adds inputs to screen to display on calculator
 function screenDisplay(input, type='add') {
     // Screen types
@@ -11,16 +39,18 @@ function screenDisplay(input, type='add') {
     // solution -> new calculated solution
     // Show '0' if there is no input
 
-    const currentDisplay = calculatorScreen.innerHTML;
 
+    if (clearScreenOnNextInput === true) { clearScreen(); clearScreenOnNextInput = false; }
+
+    const currentDisplay = calculatorScreen.innerHTML;
+    
     // Prevent any inputs over limit
     if (currentDisplay.length > charLimit) { errorLight(); return false; 
     } else if (currentDisplay.length === charLimit && type === 'add') { errorLight(); return false;} 
 
-    if (currentDisplay.length === 0) { calculatorScreen.innerHTML = '0'; }
-    if (type === 'add') { calculatorScreen.innerHTML = currentDisplay + input; console.log('HDD'); }
-    if (type === 'new') { calculatorScreen.innerHTML = input; }
-
+    if (currentDisplay.length < 1) { calculatorScreen.innerHTML = '0'; }
+    if (type === 'add') { calculatorScreen.innerHTML = currentDisplay + input; currentInputValue = calculatorScreen.innerHTML; } // Update display and current input value
+    if (type === 'new') { calculatorScreen.innerHTML = input; currentInputValue = calculatorScreen.innerHTML; } // Update display and current input value
 
     // Limit number digits to set limit
     if (type === 'solution') {
@@ -30,36 +60,16 @@ function screenDisplay(input, type='add') {
         // Show any numbers too large for screen as exponents
         if (overflowInput.toString().length > charLimit) { 
             if (overflowInput > 10000000000000 || overflowInput < -10000000000000) {
-                overflowInput = Math.round(Number(((overflowInput / (10 ** (overflowInput.toString().length - 1))).toString().slice(0,10) * (1000000000000)) / (1000000000000))) + 'ᴇ' + overflowInput.toString().length;
+                overflowInput = input.toPrecision(charLimit - 4); // Output #.########e## (-4 of char limit to allow for e### portion)
             } else {
             // Otherwise, round large numbers (full or decimal) to global limit 
             overflowInput = Math.round(Number(overflowInput.toString().slice(0, charLimit)) * (10 ** charLimit)) / 10 ** charLimit; }
         }
 
         calculatorScreen.innerHTML = overflowInput; // Display outputted number on screen
-        firstNumberInput = input; // Keep full, uncondensed number for future calculations
+        calculatorEquation.firstNumber = input; // Keep full, uncondensed number for future calculations
+        currentInputValue = input;
     }
-}
-
-// Add a check to see if the user has checkEquationd a problem
-// Add button check constants
-let alreadyEquated = false;
-let operatorInUse = false;
-let decimalInUse = false;
-let clearNextInput = false;
-
-
-
-// Clear calculator 'screen' and reset booleans
-function clearScreen() {
-    calculateIsOn = true;
-    operatorInUse = false;
-    decimalInUse = false;
-    alreadyEquated = false;
-    firstNumberInput = '';
-    secondNumberInput = '';
-    operatorInput = '';
-    calculatorScreen.innerHTML = '0';
 }
 
 
@@ -70,6 +80,11 @@ const operatorLookup = {
     '−': (a, b) => ((a * 100) - (b * 100)) / 100,
     '×': (a, b) => (a * b),
     '÷': (a, b) => (a / b)
+}
+
+// Ensure inputted value is a number
+function inputIsNumber(input) {
+    return Number.isFinite(parseFloat(input));
 }
 
 // List of valid input numbers to be used
@@ -89,30 +104,27 @@ function buttonEvaluator(buttonValue=String) {
 
     // Current screen html value
     let screenInput = calculatorScreen.innerHTML;
+    if (!inputIsNumber(screenInput)) { screenInput = currentInputValue; }
 
     // Clear button is used
-    if (buttonValue === clearButton) { clearScreen(); return; }
-
-    // Check if clear boolean on, clear out screen for next series of inputs
-    if (clearNextInput) { clearNextInput = false; screenInput = ''; screenDisplay('', 'new');}
+    if (buttonValue === clearButton) { clearScreen(); resetCalculatorEquation(); calculatorScreen.innerHTML = '0'; return; }
 
     // For valid number inputs
-    if (buttonValue in validNumbers) { if (screenInput === '0') { screenDisplay(buttonValue, 'new') } else { screenDisplay(buttonValue, 'add')} return; }
-
+    if (buttonValue in validNumbers) { if (screenInput === '0') { screenDisplay(buttonValue, 'new'); return; } else { screenDisplay(buttonValue, 'add')} return; }
     // Equal sign used, send inputted equation to be checked
-    if (buttonValue === equalsButton) { secondNumberInput = screenInput; operate(operatorInput, firstNumberInput, secondNumberInput); return; }
+    if (buttonValue === equalsButton) { calculatorEquation.secondNumber = currentInputValue; console.log(calculatorEquation);  operate(calculatorEquation); return;}
 
     // Decimal button is used
     if (buttonValue === decimalButtonValue) {
-        if (!decimalInUse) { decimalInUse = true; 
-            if (screenInput === '0' || alreadyEquated) { screenDisplay(buttonValue, 'new');} else { screenDisplay(buttonValue, 'add')}}
-        return; 
+        if (screenInput === '0') { screenDisplay(buttonValue, 'new');} 
+        else if (screenInput.split('').includes(decimalButtonValue)) {
+            // Do nothing, decimal present
+        } else { screenDisplay(buttonValue, 'add')}
+        return;
     }
 
     // Backspace is used, end of string is sliced off
     if (buttonValue === backButtonValue) {
-        console.log(alreadyEquated)
-        if (alreadyEquated) { clearScreen(); return; }
         if (screenInput.at(-1) === decimalButtonValue) { decimalInUse = false; } // Toggle use of decimal back on if deleted
         let newScreenInput = screenInput.slice(0, -1);
         screenDisplay(newScreenInput, 'new');
@@ -121,45 +133,48 @@ function buttonEvaluator(buttonValue=String) {
 
     // An operator is used, determine what functions to run
     if (buttonValue in operatorLookup) {
+        console.log(calculatorEquation);
         if (screenInput === '0' && buttonValue === '−' || screenInput === '' && buttonValue === '−') {screenDisplay('-', 'new'); return;} // Display negative sign if first entry on new screen
-        if (firstNumberInput === '') { firstNumberInput = screenInput; operatorInput = buttonValue, operatorInUse = true; clearNextInput = true; decimalInUse = false; return; } // Store current number and operator, toggle operator boolean
-        if (!operatorInUse) { operatorInUse = true; operatorInput = buttonValue; clearNextInput = true; return; } // After using operator first time, ready for next number input
-        if (operatorInUse && !alreadyEquated && secondNumberInput === '') { secondNumberInput = screenInput; operate(operatorInput, firstNumberInput, secondNumberInput); return; } // Run equation if operator already present
+        if (calculatorEquation.operator === '') { // No operator in array
+            // Add input to first number array slot
+            if (calculatorEquation.firstNumber === '' && inputIsNumber(screenInput)) { calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = screenInput; clearScreenOnNextInput = true; clearCurrentInputValue();}
+            if (inputIsNumber(calculatorEquation.firstNumber)) { calculatorEquation.operator = buttonValue; }
+        } else { // Attempt to run the equation through operate and assign new array values for operator and first number
+            if (inputIsNumber(calculatorEquation.firstNumber) && inputIsNumber(screenInput)) { calculatorEquation.secondNumber = currentInputValue; operate(calculatorEquation); calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = calculatorScreen.innerHTML; }
+        }
+        return;
     }
+    
+    errorLight(); // If button input gets through all above checks it is not a valid input
 }
 
-
-// Calc variables
-let firstNumberInput = '';
-let secondNumberInput = '';
-let operatorInput = '';
 
 
 // Runs equation based on matching operators
 // Updates 'screen' with solution
-function operate(operator, firstNumber, secondNumber) {
-    // Check for incorrect inputs, send error light if found
-    if (!operator in operatorLookup || isNaN(firstNumber) || isNaN(secondNumber) || firstNumber === '' || secondNumber === '' || operator === '') { errorLight(); return false; } 
-
-    let solution = operatorLookup[operator](firstNumber, secondNumber);
-
-    // Handle different type of 'errors' that may occur
-    if (solution === Infinity) { errorLight(`ERR00000R`, 2200, 'div0'); return false; } 
-    else if (solution === NaN) { errorLight(); return false; }
-
-
-
-    // Express large numbers over 14 digit limit (whole integers)
+function operate(equationObj) {
     
-    console.log(solution)
-    // Update 'screen' and reset boolean values
-    alreadyEquated = true;
-    decimalInUse = false;
-    operatorInUse = false
-    firstNumberInput = solution;
-    secondNumberInput = '';
-    operatorInput = '';
-    screenDisplay(solution, 'solution');
+    if (validateEquation(equationObj)) {
+
+        let solution = operatorLookup[equationObj.operator](equationObj.firstNumber, equationObj.secondNumber);
+
+        // Handle different type of 'errors' that may occur
+        if (solution === Infinity) { errorLight(`ERR00000R`, 2200, 'div0'); return false; } 
+        else if (solution === NaN) { errorLight(); return false; }
+
+        // Express large numbers over 14 digit limit (whole integers)
+        resetCalculatorEquation();
+        screenDisplay(solution, 'solution');
+        clearScreenOnNextInput = true;
+        
+    }
+}
+
+// Ensure a proper equation is present
+function validateEquation(equationObj) {
+    if (equationObj.operator in operatorLookup && inputIsNumber(equationObj.firstNumber) && inputIsNumber(equationObj.secondNumber)) {
+        return true;
+    } else { errorLight(); return false;}
 }
 
 

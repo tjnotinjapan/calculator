@@ -60,6 +60,10 @@
 - Added rounding support and global limit of 14 digits
 - CSS and HTML adjusted for calculator appearance
 - Added some support for whole numbers too big for screen. Need to increase accuracy.
-### Future to do
-- Adjust screen to support numbers over 14 digits (expressed in exponent)
-- Let second operator calculate an expression
+### 9/17/2026
+- Branched and redid javascript section heavily. Moved from string input for `operate` to an object.
+- `calculatorEquation` object has operator, firstNumber, and secondNumber in it. `buttonEvaluator` and `screenDisplay` now check and modify it to instead of using several booleans.
+- JS has been streamlined as a result.
+- Used toPrecision to modify numbers too large for screen. Should keep within set 14-character limit to fit on screen.
+- Need to do bug testing but all core functions and extra credit implemented.
+- Merged branch back to main.
