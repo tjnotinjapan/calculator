@@ -67,3 +67,11 @@
 - Used toPrecision to modify numbers too large for screen. Should keep within set 14-character limit to fit on screen.
 - Need to do bug testing but all core functions and extra credit implemented.
 - Merged branch back to main.
+### 9/17/2026 part ii
+- Reduced charlimit to 13.
+- Fixed decimal not working after an operator is used.
+- Screen now shows '0' if backspace used to remove all digits / turn on calculator.
+- Fixed being able to span an operator to keep calculating.
+### Bugs to fix
+- subtract operator as negative for 2nd number
+- operator key being highlighted while in use

@@ -1,7 +1,7 @@
 // Set 'screen' variable
 const calculatorScreen = document.querySelector('#calculator-screen');
 // Limit input to 14 chars for screen
-const charLimit = 14;
+const charLimit = 13;
 
 // Should be assigned: operator, first number, second number to run an equation
 const calculatorEquation = {
@@ -10,6 +10,9 @@ const calculatorEquation = {
     secondNumber: ''
 }
 
+// Used for equals sign to rerun above object
+// let calculateItAgain = calculatorEquation;
+
 function resetCalculatorEquation() {
     calculatorEquation.operator = '';
     calculatorEquation.firstNumber = '';
@@ -17,6 +20,7 @@ function resetCalculatorEquation() {
 }
 
 // Resets after first number inputted to prevent duplicates / auto calculating
+// Current value used to hold values that may differ from shown on screen
 let currentInputValue = '';
 function clearCurrentInputValue() {
     currentInputValue = '';
@@ -112,11 +116,15 @@ function buttonEvaluator(buttonValue=String) {
     // For valid number inputs
     if (buttonValue in validNumbers) { if (screenInput === '0') { screenDisplay(buttonValue, 'new'); return; } else { screenDisplay(buttonValue, 'add')} return; }
     // Equal sign used, send inputted equation to be checked
-    if (buttonValue === equalsButton) { calculatorEquation.secondNumber = currentInputValue; console.log(calculatorEquation);  operate(calculatorEquation); return;}
+    if (buttonValue === equalsButton) { 
+        // if (validateEquation(calculateItAgain) && clearScreenOnNextInput === true) { operate(calculateItAgain);
+        calculatorEquation.secondNumber = currentInputValue; operate(calculatorEquation); } // Equals can redo calculation again and again else do normal calculation
+            
 
     // Decimal button is used
     if (buttonValue === decimalButtonValue) {
-        if (screenInput === '0') { screenDisplay(buttonValue, 'new');} 
+        if (screenInput === '0') { screenDisplay(buttonValue, 'new'); } 
+        else if (clearScreenOnNextInput === true) { screenDisplay(buttonValue, 'new'); }
         else if (screenInput.split('').includes(decimalButtonValue)) {
             // Do nothing, decimal present
         } else { screenDisplay(buttonValue, 'add')}
@@ -125,7 +133,7 @@ function buttonEvaluator(buttonValue=String) {
 
     // Backspace is used, end of string is sliced off
     if (buttonValue === backButtonValue) {
-        if (screenInput.at(-1) === decimalButtonValue) { decimalInUse = false; } // Toggle use of decimal back on if deleted
+        if (screenInput.length === 1 || screenInput.length === 0 || clearScreenOnNextInput === true) { screenDisplay('0', 'new'); return; }
         let newScreenInput = screenInput.slice(0, -1);
         screenDisplay(newScreenInput, 'new');
         return;
@@ -133,14 +141,14 @@ function buttonEvaluator(buttonValue=String) {
 
     // An operator is used, determine what functions to run
     if (buttonValue in operatorLookup) {
-        console.log(calculatorEquation);
+
         if (screenInput === '0' && buttonValue === '−' || screenInput === '' && buttonValue === '−') {screenDisplay('-', 'new'); return;} // Display negative sign if first entry on new screen
         if (calculatorEquation.operator === '') { // No operator in array
             // Add input to first number array slot
             if (calculatorEquation.firstNumber === '' && inputIsNumber(screenInput)) { calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = screenInput; clearScreenOnNextInput = true; clearCurrentInputValue();}
             if (inputIsNumber(calculatorEquation.firstNumber)) { calculatorEquation.operator = buttonValue; }
         } else { // Attempt to run the equation through operate and assign new array values for operator and first number
-            if (inputIsNumber(calculatorEquation.firstNumber) && inputIsNumber(screenInput)) { calculatorEquation.secondNumber = currentInputValue; operate(calculatorEquation); calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = calculatorScreen.innerHTML; }
+            if (inputIsNumber(calculatorEquation.firstNumber) && inputIsNumber(screenInput) && !clearScreenOnNextInput) { calculatorEquation.secondNumber = currentInputValue; operate(calculatorEquation); calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = calculatorScreen.innerHTML; }
         }
         return;
     }
@@ -153,10 +161,12 @@ function buttonEvaluator(buttonValue=String) {
 // Runs equation based on matching operators
 // Updates 'screen' with solution
 function operate(equationObj) {
-    
+
     if (validateEquation(equationObj)) {
 
         let solution = operatorLookup[equationObj.operator](equationObj.firstNumber, equationObj.secondNumber);
+
+        
 
         // Handle different type of 'errors' that may occur
         if (solution === Infinity) { errorLight(`ERR00000R`, 2200, 'div0'); return false; } 
@@ -166,7 +176,6 @@ function operate(equationObj) {
         resetCalculatorEquation();
         screenDisplay(solution, 'solution');
         clearScreenOnNextInput = true;
-        
     }
 }
 
@@ -215,6 +224,8 @@ function powerSwitch(status) {
     if (status === 'off') {
         calculatorScreen.innerHTML = '';
         powerLight.style.display = 'none';
+        resetCalculatorEquation();
+        clearCurrentInputValue();
         throw Error("CALCULATOR_OFF"); // Force ends all functions
     } else { powerLight.style.display = 'block';}
 }
@@ -234,6 +245,6 @@ function errorLight(message, duration=100, type='') {
     setTimeout(() => {
         errorLightEl.style.display = 'none';
         if (message) { clearScreen(); }
-        if (type === 'div0') { calcTitleText.innerHTML = calcTitleTextOriginal; }
+        if (type === 'div0') { calcTitleText.innerHTML = calcTitleTextOriginal; powerSwitch('off'); }
     }, duration); 
 }
