@@ -72,6 +72,9 @@
 - Fixed decimal not working after an operator is used.
 - Screen now shows '0' if backspace used to remove all digits / turn on calculator.
 - Fixed being able to span an operator to keep calculating.
-### Bugs to fix
-- subtract operator as negative for 2nd number
-- operator key being highlighted while in use
+### 9/18/2026
+- Subtract key can now be used to input negative number for second number
+- Added operators being highlighted when in use (subtract not highlighted when used to input negative sign)
+- Fixed issue with odd calculated number carrying over to new inputted numbers
+- Added `caculateItAgain` variable to copy previous calculation and allow to re-run operator and second number if user keeps hitting equals sign.
+- Added digital font from https://www.cdnfonts.com/digital-numbers.font

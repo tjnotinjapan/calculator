@@ -11,7 +11,11 @@ const calculatorEquation = {
 }
 
 // Used for equals sign to rerun above object
-// let calculateItAgain = calculatorEquation;
+let calculateItAgain = {
+    operator: '',
+    firstNumber: '',
+    secondNumber: ''
+}
 
 function resetCalculatorEquation() {
     calculatorEquation.operator = '';
@@ -42,7 +46,7 @@ function screenDisplay(input, type='add') {
     // new -> override screen with new input
     // solution -> new calculated solution
     // Show '0' if there is no input
-
+    console.log(calculatorEquation)
 
     if (clearScreenOnNextInput === true) { clearScreen(); clearScreenOnNextInput = false; }
 
@@ -99,29 +103,45 @@ const backButtonValue = document.querySelector('#back-button').value;
 const decimalButtonValue = document.querySelector('#decimal-button').value;
 const equalsButton = document.querySelector('#equals-button').value;
 const clearButton = document.querySelector('#clear-button').value;
+const subtractButton = document.querySelector('#−-button').value;
 
 // Value of buttons evaluated for type / function (should be inputted as string value)
 function buttonEvaluator(buttonValue=String) {
-
     // Turns calculator on or off (off if value is 'off')
     powerSwitch(buttonValue);
 
     // Current screen html value
     let screenInput = calculatorScreen.innerHTML;
     if (!inputIsNumber(screenInput)) { screenInput = currentInputValue; }
-
+    
+    // Use the subtraction button as a negative sign    
+    if (buttonValue === subtractButton) { 
+        if (screenInput === '0' && calculatorEquation.operator in operatorLookup || screenInput === '') {screenDisplay('-', 'new'); return;
+        } else if (clearScreenOnNextInput === true && calculatorEquation.operator in operatorLookup || clearScreenOnNextInput === true && screenInput === '0') {
+            screenDisplay('-', 'new');
+            return;
+        }
+    }
+    
+    // Highlight buttons pressed (operators only)
+    highlightButton(buttonValue);
+    
     // Clear button is used
     if (buttonValue === clearButton) { clearScreen(); resetCalculatorEquation(); calculatorScreen.innerHTML = '0'; return; }
-
+    
     // For valid number inputs
-    if (buttonValue in validNumbers) { if (screenInput === '0') { screenDisplay(buttonValue, 'new'); return; } else { screenDisplay(buttonValue, 'add')} return; }
+    if (buttonValue in validNumbers) {
+        // After calculating, reset calculator screen if starting new number sequence
+        if (calculatorEquation.operator === '' && calculatorEquation.firstNumber !== '') { resetCalculatorEquation(); screenDisplay(buttonValue, 'new'); return; }
+        // Input new number in place of 0 or add otherwise
+        if (screenInput === '0') { screenDisplay(buttonValue, 'new'); return; } else { screenDisplay(buttonValue, 'add')} return; }
+    
     // Equal sign used, send inputted equation to be checked
     if (buttonValue === equalsButton) { 
-        // if (validateEquation(calculateItAgain) && clearScreenOnNextInput === true) { operate(calculateItAgain);
+        if (clearScreenOnNextInput === true) { calculateItAgain.firstNumber = currentInputValue; operate(calculateItAgain); }
         calculatorEquation.secondNumber = currentInputValue; operate(calculatorEquation); } // Equals can redo calculation again and again else do normal calculation
-            
-
-    // Decimal button is used
+    
+        // Decimal button is used
     if (buttonValue === decimalButtonValue) {
         if (screenInput === '0') { screenDisplay(buttonValue, 'new'); } 
         else if (clearScreenOnNextInput === true) { screenDisplay(buttonValue, 'new'); }
@@ -130,19 +150,16 @@ function buttonEvaluator(buttonValue=String) {
         } else { screenDisplay(buttonValue, 'add')}
         return;
     }
-
     // Backspace is used, end of string is sliced off
     if (buttonValue === backButtonValue) {
-        if (screenInput.length === 1 || screenInput.length === 0 || clearScreenOnNextInput === true) { screenDisplay('0', 'new'); return; }
+        if (screenInput.length === 1 || screenInput.length === 0 || clearScreenOnNextInput === true) { clearScreen(); resetCalculatorEquation(); screenDisplay('0', 'new'); return; }
         let newScreenInput = screenInput.slice(0, -1);
-        screenDisplay(newScreenInput, 'new');
+        calculatorScreen.innerHTML = newScreenInput;
+        currentInputValue = newScreenInput;
         return;
     }
-
     // An operator is used, determine what functions to run
     if (buttonValue in operatorLookup) {
-
-        if (screenInput === '0' && buttonValue === '−' || screenInput === '' && buttonValue === '−') {screenDisplay('-', 'new'); return;} // Display negative sign if first entry on new screen
         if (calculatorEquation.operator === '') { // No operator in array
             // Add input to first number array slot
             if (calculatorEquation.firstNumber === '' && inputIsNumber(screenInput)) { calculatorEquation.operator = buttonValue; calculatorEquation.firstNumber = screenInput; clearScreenOnNextInput = true; clearCurrentInputValue();}
@@ -152,10 +169,12 @@ function buttonEvaluator(buttonValue=String) {
         }
         return;
     }
+
+    // Highlight operator when pressed
+    highlightButton(buttonValue);
     
     errorLight(); // If button input gets through all above checks it is not a valid input
 }
-
 
 
 // Runs equation based on matching operators
@@ -166,10 +185,8 @@ function operate(equationObj) {
 
         let solution = operatorLookup[equationObj.operator](equationObj.firstNumber, equationObj.secondNumber);
 
-        
-
         // Handle different type of 'errors' that may occur
-        if (solution === Infinity) { errorLight(`ERR00000R`, 2200, 'div0'); return false; } 
+        if (solution === Infinity) { errorLight(`INFINITY ERR0R`, 2200, 'div0'); return false; } 
         else if (solution === NaN) { errorLight(); return false; }
 
         // Express large numbers over 14 digit limit (whole integers)
@@ -179,9 +196,11 @@ function operate(equationObj) {
     }
 }
 
-// Ensure a proper equation is present
+
+// Ensure a proper equation is present (and save copy to calculate it again)
 function validateEquation(equationObj) {
     if (equationObj.operator in operatorLookup && inputIsNumber(equationObj.firstNumber) && inputIsNumber(equationObj.secondNumber)) {
+        calculateItAgain = { ...equationObj };
         return true;
     } else { errorLight(); return false;}
 }
@@ -209,13 +228,26 @@ const keyboardOperatorLookup = {
 
 const keyboardButton = document.addEventListener('keydown', (event) => {
     event.preventDefault();
-    console.log(event.key)
     if (event.key in keyboardOperatorLookup) {
         buttonEvaluator(keyboardOperatorLookup[event.key])
     } else {
         buttonEvaluator(event.key);
     }
 });
+
+// Highlight specific buttons on the calculator
+let buttonIsHighlighted = false;
+function removeHighlights() { document.querySelectorAll('.active').forEach(el => el.classList.remove('active')); }
+function highlightButton(button) {
+    if (button in operatorLookup) { // Highlight operators
+        if (currentInputValue === '-') { }
+        if (buttonIsHighlighted === true) { removeHighlights(); } // Remove highlight if active
+        document.getElementById(`${button}-button`).classList.add('active');
+        buttonIsHighlighted = true;
+    }
+
+    if (button === clearButton || button === equalsButton || button === 'off') { removeHighlights(); }
+}
 
 
 // Turn calculator 'on' or 'off'
@@ -226,6 +258,7 @@ function powerSwitch(status) {
         powerLight.style.display = 'none';
         resetCalculatorEquation();
         clearCurrentInputValue();
+        removeHighlights();
         throw Error("CALCULATOR_OFF"); // Force ends all functions
     } else { powerLight.style.display = 'block';}
 }
@@ -240,7 +273,7 @@ function errorLight(message, duration=100, type='') {
     errorLightEl.style.display = 'block';
     // Show error message (limit to 7 digits)
     if (message) { calculatorScreen.innerHTML = message;}
-    if (type === 'div0') {calcTitleText.innerHTML = 'You cannot divide by 0!';}
+    if (type === 'div0') {calcTitleText.innerHTML = 'You divided by 0 or hit # limit';}
     
     setTimeout(() => {
         errorLightEl.style.display = 'none';

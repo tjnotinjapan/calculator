@@ -2,19 +2,16 @@ body {
     border: 8px solid rgb(54, 54, 54);
     margin: 0 auto;
     margin-top: 20px;
-    max-width: 400px;
+    max-width: 470px;
     text-align: center;
 }
-
-
-
 
 #calculator-container {
     display: flex;
     flex-direction: column;
     background-color: rgb(44, 44, 44);
-    height: 470px;
-    width: 400px;
+    height: 520px;
+    width: 470px;
     position: relative;
 } 
 
@@ -74,7 +71,8 @@ body {
     background-color: rgb(158, 152, 141);
     border: 2px solid black;
     height: 60px;
-    font-size: 50px;
+    font-size: 40px;
+    font-family: 'Digital Numbers', sans-serif; /* https://www.cdnfonts.com/digital-numbers.font */
     text-align: right;
     margin-top: 75px;
 }
@@ -89,12 +87,16 @@ body {
     border-radius: 5px;
     color: white;   
     font-size: 30px;
-    height: 60px;
-    width: 95px;
+    height: 70px;
+    width: 115px;
+}
+
+.input-button.active {
+    background-color: rgb(121, 121, 121);
 }
 
 .input-button.plus {
-    height: 120px;
+    height: 140px;
 }
 
 #clear-button {
