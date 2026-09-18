@@ -186,7 +186,7 @@ function operate(equationObj) {
         let solution = operatorLookup[equationObj.operator](equationObj.firstNumber, equationObj.secondNumber);
 
         // Handle different type of 'errors' that may occur
-        if (solution === Infinity) { errorLight(`INFINITY ERR0R`, 2200, 'div0'); return false; } 
+        if (solution === Infinity) { errorLight(`INFINITY ERR+0R`, 2200, 'div0'); return false; } 
         else if (solution === NaN) { errorLight(); return false; }
 
         // Express large numbers over 14 digit limit (whole integers)
@@ -218,10 +218,10 @@ calculatorButtons.forEach(button => {
 
 // Supported non-number (unique) keyboard inputs to match calculator buttons
 const keyboardOperatorLookup = {
-    '+': ' + ',
-    '-': ' − ',
-    '*': ' × ',
-    '/': ' ÷ ',
+    '+': '+',
+    '-': '−',
+    '*': '×',
+    '/': '÷',
     'Enter': '=',
     '.': '.'
 }
